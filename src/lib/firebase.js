@@ -2,6 +2,8 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
+const path = "todos"
+
 const firebaseConfig = {
   apiKey: "AIzaSyDFwbDcLYuu5yjhx4zq07dbi-0fdr_jJEQ",
   authDomain: "fir-sample-98402.firebaseapp.com",
@@ -13,13 +15,12 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const db = firebase.firestore();
-export const auth = firebase.auth();
+export const authorize = firebase.auth();
 export default firebase;
 
 export const getFirebaseItems = async () => {
   try {
-    const snapshot = await db
+    const snapshot = await firebase.firestore()
       .collection("todos")
       .get();
     const items = snapshot.docs.map(
@@ -34,7 +35,7 @@ export const getFirebaseItems = async () => {
 
 export const addFirebaseItem = async (item) => {
   try {
-    const todoRef = db.collection("todos");
+    const todoRef = firebase.firestore().collection("todos");
     await todoRef.add(item);
   } catch (err) {
     console.log(err);
@@ -43,7 +44,7 @@ export const addFirebaseItem = async (item) => {
 
 export const updateFirebaseItem = async (item, id) => {
   try {
-    const todoRef = db.collection("todos").doc(id);
+    const todoRef = firebase.firestore().collection("todos").doc(id);
     await todoRef.update(item);
   } catch (err) {
     console.log(err);
@@ -51,7 +52,7 @@ export const updateFirebaseItem = async (item, id) => {
 }
 
 export const clearFirebaseItem = async (item) => {
-  const todoRef = db.collection("todos").doc(item.id);
+  const todoRef = firebase.firestore().collection("todos").doc(item.id);
   await todoRef.delete().then(function () {
   }).catch(function (err) {
     console.log(err);
@@ -68,9 +69,9 @@ export const uiConfig = {
 
 export const storeUserInfo = async (user) => {
   const { uid } = user;
-  const userDoc = await db.collection("users").doc(uid).get();
+  const userDoc = await firebase.firestore().collection("users").doc(uid).get();
   if (!userDoc.exists) {
-    await db.collection("users").doc(uid).set({ name: user.displayName });
+    await firebase.firestore().collection("users").doc(uid).set({ name: user.displayName });
     return {
       name: user.displayName,
       id: uid,
