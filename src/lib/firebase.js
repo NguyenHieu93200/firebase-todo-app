@@ -67,42 +67,53 @@ export const uiConfig = {
   ],
 }
 
-export const storeUserInfo = async (user) => {
+export const uploadImage = async (image) => {
+  const ref = firebase.storage().ref().child(`/images/${image.name}`);
+  let url = "";
+  try {
+      await ref.put(image);
+      url = await ref.getDownloadURL();
+  } catch (err) {
+      console.log(err);
+  }
+  return url;
+};
+
+
+export const storeUser = async (user) => {
   const { uid } = user;
   const userDoc = await firebase.firestore().collection("users").doc(uid).get();
   if (!userDoc.exists) {
-    await firebase.firestore().collection("users").doc(uid).set({ name: user.displayName });
-    return {
-      name: user.displayName,
-      id: uid,
-    };
+      await firebase.firestore().collection("users").doc(uid).set({ name: user.displayName });
+      return {
+          name: user.displayName,
+          avatar: "",
+          id: uid,
+      };
   } else {
-    return {
-      id: uid,
-      ...userDoc.data(),
-    };
+      return {
+          id: uid,
+          ...userDoc.data(),
+      };
   }
 }
 
-export const updateUser = async (user, image) => {
+export const updateAvatar = async (user, image) => {
   try {
-    const userDoc = await firebase.firestore().collection("users").doc(user.id).get();
-    if (userDoc.exists) {
-      await firebase.firestore().collection("users").doc(user.id).update({ ...userDoc.data(), image: image });
-    }
+      const userDoc = await firebase.firestore().collection("users").doc(user.id).get();
+      if (userDoc.exists) {
+          await firebase.firestore().collection("users").doc(user.id).update({ ...userDoc.data(), avatar: image });
+          return {
+              ...user,
+              avatar: image
+          }
+      }
+return {
+  err: true
+}
   } catch (err) {
-    console.log(err);
+  return {
+      err: true
   }
 }
-
-export const uploadImage = async (image) => {
-  const ref = firebase.storage().ref().child(`/images/${image.name}`);
-  let downloadUrl = "";
-  try {
-    await ref.put(image);
-    downloadUrl = await ref.getDownloadURL();
-  } catch (err) {
-    console.log(err);
-  }
-  return downloadUrl;
-};
+}
